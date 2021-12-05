@@ -5,6 +5,10 @@ ROOT=$(shell pwd)
 LINT_COMMIT_TARGET_BRANCH=origin/main
 
 # Commands
+.PHONY: install-hooks
+install-hooks:
+	git config core.hooksPath .githooks
+
 .PHONY: linter
 build-linter:
 	@docker build linter/ -t ${DOCKER_LINTER_IMAGE}
