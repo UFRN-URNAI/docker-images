@@ -14,6 +14,7 @@ RUN apt-get update \
   && apt-get install --no-install-recommends -qy \
     nodejs \
     git \
+    apt-transport-https \
   && rm -rf /var/lib/apt/lists/*
 
 # Install linter for commits (https://github.com/conventional-changelog/commitlint)
@@ -30,10 +31,17 @@ RUN npm install -g \
   markdownlint-cli@0.30.0
 
 # Install linter for Shell scripts (https://github.com/koalaman/shellcheck)
-RUN apk --no-cache add shellcheck
+RUN apt-get install --no-install-recommends -qy \
+    xz-utils \
+    && scversion="stable" # or "v0.4.7", or "latest" \
+    && wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${scversion?}/shellcheck-${scversion?}.linux.x86_64.tar.xz" | tar -xJv \
+    && cp "shellcheck-${scversion}/shellcheck" /usr/bin/ \
+    && apt-get install --no-install-recommends -qy \
+    shellcheck
 
 # Install linter for Yaml (https://github.com/adrienverge/yamllint)
-RUN apk --no-cache add yamllint
+RUN pip3 install \
+    yamllint==1.26.3
 
 # Install linter for Python (https://github.com/PyCQA/flake8)
 RUN pip3 install \
