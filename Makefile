@@ -9,11 +9,11 @@ LINT_COMMIT_TARGET_BRANCH=origin/main
 install-hooks:
 	git config core.hooksPath .githooks
 
-.PHONY: linter
+.PHONY: build-linter
 build-linter:
 	@docker build linter/ -t ${DOCKER_LINTER_IMAGE}
 
-.PHONY: linter-no-cache
+.PHONY: build-linter-no-cache
 build-linter-no-cache:
 	@docker build linter/ -t ${DOCKER_LINTER_IMAGE} --no-cache
 
@@ -27,4 +27,6 @@ lint:
 	@docker run --rm -v ${ROOT}:/app ${DOCKER_LINTER_IMAGE} " \
 		lint-commit ${LINT_COMMIT_TARGET_BRANCH} \
 		&& lint-markdown \
-		&& lint-dockerfile"
+		&& lint-dockerfile \
+		&& lint-shell-script \
+		&& lint-yaml"
