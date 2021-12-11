@@ -29,6 +29,9 @@ RUN npm install -g \
 RUN npm install -g \
   markdownlint-cli@0.30.0
 
+# Install linter for Yaml (https://github.com/adrienverge/yamllint)
+RUN apk --no-cache add yamllint
+
 # Install linter for Python (https://github.com/PyCQA/flake8)
 RUN pip3 install \
   flake8==4.0.1 \
@@ -38,7 +41,8 @@ RUN pip3 install \
   flake8-docstrings==1.6.0
 
 # Adds shell commands
-COPY ./commands/* /usr/bin/
+COPY ./commands/*.sh /usr/bin/
+RUN find /usr/bin -type f -name "*.sh" | while read NAME ; do mv "${NAME}" "${NAME%.sh}" ; done
 
 # Default lint configurations
 RUN mkdir -p ${LINT_CONFIG_PATH} ${LINT_CUSTOM_CONFIG_PATH}
