@@ -7,4 +7,4 @@ if [[ -z "${FILES}" ]]; then
   exit 0
 fi
 
-echo "${FILES}" | xargs dockerfilelint
+echo "${FILES}" | xargs dockerfilelint -c '.lint'
