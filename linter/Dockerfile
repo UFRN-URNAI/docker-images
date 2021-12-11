@@ -29,6 +29,9 @@ RUN npm install -g \
 RUN npm install -g \
   markdownlint-cli@0.30.0
 
+# Install linter for Shell scripts (https://github.com/koalaman/shellcheck)
+RUN apk --no-cache add shellcheck
+
 # Install linter for Yaml (https://github.com/adrienverge/yamllint)
 RUN apk --no-cache add yamllint
 
