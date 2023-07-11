@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+env:
+  DOCKER_IMAGE_DIRECTORIES: ("linter")
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -25,28 +28,19 @@ jobs:
           FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.before }} ${GITHUB_SHA})
           readarray -t FILES_ARRAY <<< "$FILES"
           IFS='/'
-          DOCKER_IMAGES=()
-          echo "${FILES_ARRAY[*]}"
+          DOCKER_IMAGES_PUSHED=()
 
           for FILENAME in "${FILES_ARRAY[@]}"; do
-            if [[ "$FILENAME" != *"/"* ]]; then
+            read -a PATH_FILE <<< "$FILENAME"
+            if [[ ! "${DOCKER_IMAGE_DIRECTORIES[*]}" =~ "${PATH_FILE[0]}" ]]; then
               continue
             fi
-            if [[ "$FILENAME" == "."* ]]; then
-              continue
-            fi
-
-            read -a PATHS <<< "$FILENAME"
-            if [[ ! (${#PATHS[@]} > 1) ]]; then
+            if [[ " ${DOCKER_IMAGES_PUSHED[*]} " =~ " ${PATH_FILE[0]} " ]]; then
               continue
             fi
 
-            DOCKER_IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/${PATHS[0]}:latest"
-            if [[ " ${DOCKER_IMAGES[@]} " =~ " ${DOCKER_IMAGE_NAME} " ]]; then
-              continue
-            fi
-
-            docker build -t "${DOCKER_IMAGE_NAME}" ${PATHS[0]}/
+            DOCKER_IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/${PATH_FILE[0]}"
+            docker build "${PATH_FILE[0]}" -t "${DOCKER_IMAGE_NAME}"
             docker push "${DOCKER_IMAGE_NAME}"
-            DOCKER_IMAGES+=($DOCKER_IMAGE_NAME)
+            DOCKER_IMAGES_PUSHED+=("${PATH_FILE[0]}")
           done
