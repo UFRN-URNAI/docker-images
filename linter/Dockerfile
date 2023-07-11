@@ -1,4 +1,4 @@
-FROM alpine:3.15
+FROM alpine:3.18
 
 # Set environment variables
 ENV HOME=/root
@@ -16,11 +16,12 @@ RUN apk --no-cache add findutils  \
     npm \
     python3 \
     py3-pip
+RUN git config --global --add safe.directory /app
 
 # Install linter for commits (https://github.com/conventional-changelog/commitlint)
 RUN npm install -g \
-  @commitlint/config-conventional@15.0.0 \
-  @commitlint/cli@15.0.0
+  @commitlint/config-conventional@17.6.6 \
+  @commitlint/cli@17.6.6
 
 # Install linter for Dockerfile (https://github.com/replicatedhq/dockerfilelint)
 RUN npm install -g \
@@ -28,7 +29,7 @@ RUN npm install -g \
 
 # Install linter for Markdown (https://github.com/igorshubovych/markdownlint-cli)
 RUN npm install -g \
-  markdownlint-cli@0.30.0
+  markdownlint-cli@0.33.0
 
 # Install linter for Shell scripts (https://github.com/koalaman/shellcheck)
 RUN apk --no-cache add shellcheck
@@ -38,11 +39,11 @@ RUN apk --no-cache add yamllint
 
 # Install linter for Python (https://github.com/PyCQA/flake8)
 RUN pip3 install \
-  flake8==4.0.1 \
-  flake8-import-order==0.18.1 \
-  flake8-quotes==3.3.1 \
+  flake8==6.0.0 \
+  flake8-import-order==0.18.2 \
+  flake8-quotes==3.3.2 \
   flake8-commas==2.1.0 \
-  flake8-docstrings==1.6.0
+  flake8-docstrings==1.7.0
 
 # Adds shell commands
 COPY ./commands/*.sh /usr/bin/
@@ -54,5 +55,4 @@ COPY ./.lint/* ${LINT_CONFIG_PATH}/
 
 # Workdir and entrypoint
 WORKDIR ${WORKDIR}
-
 ENTRYPOINT ["docker-entrypoint"]
