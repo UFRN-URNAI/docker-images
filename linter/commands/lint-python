@@ -7,4 +7,4 @@ if [[ -z "${FILES}" ]]; then
   exit 0
 fi
 
-echo "${FILES}" | xargs flake8 --config="${LINT_CONFIG_PATH}"/.flake8
+echo "${FILES}" | xargs ruff check --config="${LINT_CONFIG_PATH}"/.ruff.toml
