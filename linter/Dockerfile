@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM alpine:3.19.1
 
 # Set environment variables
 ENV HOME=/root
@@ -13,23 +13,21 @@ RUN apk --no-cache add findutils  \
     bash-completion \
     git \
     nodejs \
-    npm \
-    python3 \
-    py3-pip
+    npm
 RUN git config --global --add safe.directory /app
 
 # Install linter for commits (https://github.com/conventional-changelog/commitlint)
 RUN npm install -g \
-  @commitlint/config-conventional@17.6.6 \
-  @commitlint/cli@17.6.6
+    @commitlint/config-conventional@18.6.0 \
+    @commitlint/cli@18.6.0
 
-# Install linter for Dockerfile (https://github.com/replicatedhq/dockerfilelint)
-RUN npm install -g \
-  dockerfilelint@1.8.0
+# Install linter for Dockerfile (https://github.com/hadolint/hadolint)
+RUN wget --no-verbose -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 && \
+    chmod +x /bin/hadolint
 
 # Install linter for Markdown (https://github.com/igorshubovych/markdownlint-cli)
 RUN npm install -g \
-  markdownlint-cli@0.33.0
+    markdownlint-cli@0.39.0
 
 # Install linter for Shell scripts (https://github.com/koalaman/shellcheck)
 RUN apk --no-cache add shellcheck
@@ -37,19 +35,23 @@ RUN apk --no-cache add shellcheck
 # Install linter for Yaml (https://github.com/adrienverge/yamllint)
 RUN apk --no-cache add yamllint
 
-# Install linter for Python (https://github.com/PyCQA/flake8)
-RUN pip3 install \
-  flake8==6.0.0 \
-  flake8-import-order==0.18.2 \
-  flake8-quotes==3.3.2 \
-  flake8-commas==2.1.0 \
-  flake8-docstrings==1.7.0
+# Install Python packages
+RUN apk --no-cache add python3 \
+  py3-pip
+
+# Virtual environment
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install linter for Python (https://github.com/astral-sh/ruff)
+RUN pip3 install --no-cache-dir \
+  ruff==0.2.1
 
 # Adds shell commands
-COPY ./commands/*.sh /usr/bin/
-RUN find /usr/bin -type f -name "*.sh" | while read NAME ; do mv "${NAME}" "${NAME%.sh}" ; done
+COPY ./commands/* /usr/bin/
 
 # Default lint configurations
+# hadolint ignore=SC2086
 RUN mkdir -p ${LINT_CONFIG_PATH} ${LINT_CUSTOM_CONFIG_PATH}
 COPY ./.lint/* ${LINT_CONFIG_PATH}/
 
